@@ -1,37 +1,17 @@
 #include <DHT.h>              // Needs Adafruit Unified Sensor library installed
-// Import required libraries
 #include <ESP8266WiFi.h>
-// Import required libraries
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
-//#include <ThingSpeak.h>
-// WiFi AP parameters
-const char* ssid = "ESP8266-Endesa-IOT";
-const char* password = "OscarNeira";
-const char* HOST = "api.thingspeak.com";
-const char* FINGERPRINT =  "78 60 18 44 81 35 bf df 77 84 d4 0a 22 0d 9b 4e 6c dc 57 2c";
+#include "constants.h"
+
+#define DEBUG 1                   //For printing debug messages
 
 float temperature = 0;
-#define DHT_PIN 4        // Digital Pin for the DHT temperature sensor
-#define RELAY_PIN 4     // Digital pin for the Power Relay
-
-#define DHTTYPE DHT11   // DHT 11
 DHT dht(DHT_PIN, DHTTYPE);
 
 ADC_MODE(ADC_VCC);      // Required being able to read input voltage of ESP8266
 float voltage = 0;
-/*
-  *****************************************************************************************
-  **** Visit https://www.thingspeak.com to sign up for a free account and create
-  **** a channel.  The video tutorial http://community.thingspeak.com/tutorials/thingspeak-channels/ 
-  **** has more information. You need to change this to your channel, and your write API key
-  **** IF YOU SHARE YOUR CODE WITH OTHERS, MAKE SURE YOU REMOVE YOUR WRITE API KEY!!
-  *****************************************************************************************/
-unsigned long myChannelNumber = 25159;
-const char * myWriteAPIKey = "U0C3D7AHYOYPC86R";
-unsigned long RelayChannelNumber = 296411;
-const char * RelayReadAPIKey = "NDC713BNFZHKTUUM";
 
 WiFiManager wifiManager;
 
@@ -56,8 +36,7 @@ WiFiManager wifiManager;
 bool connect_to_wifi(){
 
   WiFi.mode(WIFI_STA);
-  //WiFi.begin("NeiraPinuela", "Pablo&Carlos");
-  WiFi.begin("ONO573C", "Pablo13Carlos16");
+  WiFi.begin("NeiraPinuela", "123456");
   Serial.println("");
 
   // Wait for connection
@@ -66,8 +45,7 @@ bool connect_to_wifi(){
     Serial.print(".");
   }
   Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
+  Serial.print("Connected to WiFi Network");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());  
 }
@@ -78,12 +56,12 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   connect_to_wifi();
-
 }
 
 bool connect_to_secureserver(const char* host, const char* fingerprint){
-  Serial.print("connecting to ");
-  Serial.println(host);
+  #if DEBUG
+  Serial.print("connecting to " + String(host));
+  #endif
   int httpsPort = 443;
   if (!client.connect(host, httpsPort)) {
     Serial.println("connection failed");
@@ -98,19 +76,18 @@ bool connect_to_secureserver(const char* host, const char* fingerprint){
   
 }
 
-bool request_thingspeak(int field, String operation, float &value, String api_key, long channel){
+bool write_thingspeak(int field, float &value, String api_key){
     if (connect_to_secureserver(HOST, FINGERPRINT)){ 
-      String url = "";
-      if (operation=="update") {
-        url = "/" + operation + "?api_key=" + String(api_key) + "&field" + String(field) + "=" + String(value);
+      String url = "/update?api_key=" + String(api_key) + "&field" + String(field) + "=" + String(value);
+      #if DEBUG 
         Serial.println(url);
-      }
+      #endif
       client.print(String("GET ") + url + " HTTP/1.1\r\n" +
              "Host: " + HOST + "\r\n" +
-             "User-Agent: BuildFailureDetectorESP8266\r\n" +
+             "User-Agent: EndesaESP8266-IoT\r\n" +
              "Connection: close\r\n\r\n");
     }else{
-      Serial.println("Error conectando a " + String(HOST));      
+      Serial.println("Error connecting to " + String(HOST));      
     }
 }
 
@@ -123,11 +100,10 @@ void loop() {
     temperature = dht.readTemperature();
     voltage = ESP.getVcc();
     Serial.println("Leido voltage"); delay(100);
-//    GET https://api.thingspeak.com/update?api_key=U0C3D7AHYOYPC86R&field1=0
     delay(100);
-    request_thingspeak(2, "update", voltage, myWriteAPIKey, myChannelNumber);
+    write_thingspeak(2, voltage, myWriteAPIKey);
     delay(16000);
-    request_thingspeak(1, "update", temperature, myWriteAPIKey, myChannelNumber);
+    write_thingspeak(1, temperature, myWriteAPIKey);
 
     //ThingSpeak.writeField(myChannelNumber, 1, temperature, myWriteAPIKey);
     Serial.println("Enviado temperature"); delay(100);
