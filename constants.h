@@ -6,28 +6,19 @@
   **** Wifi AP parameters
   *****************************************************************************************/
 // WiFi AP parameters
-const char* ssid = "ESP8266-Endesa-IOT";
-const char* password = "OscarNeira";      //You can freely change it ;)
+char* ssid = "your_wifi_ssid";
+char* password = "your_wifi_password";      //You can freely change it ;)
 
 /*
   *****************************************************************************************
-  **** Thingspeak configuration
+  **** Ubidots configuration
   *****************************************************************************************/
-const char* HOST = "api.thingspeak.com";
-//For validation of HOST and avoid MITM attacks, the following fingerprint is checked against
-//the certificate showd by the above HOST using secure connection
-const char* FINGERPRINT =  "78 60 18 44 81 35 bf df 77 84 d4 0a 22 0d 9b 4e 6c dc 57 2c"; 
-/*
-  *****************************************************************************************
-  **** Visit https://www.thingspeak.com to sign up for a free account and create
-  **** a channel.  The video tutorial http://community.thingspeak.com/tutorials/thingspeak-channels/ 
-  **** has more information. You need to change this to your channel, and your write API key
-  **** IF YOU SHARE YOUR CODE WITH OTHERS, MAKE SURE YOU REMOVE YOUR WRITE API KEY!!
-  *****************************************************************************************/
-unsigned long myChannelNumber = 25159;
-const char * myWriteAPIKey = "U0C3D7AHYOYPC86R";
-unsigned long RelayChannelNumber = 296411;
-const char * RelayReadAPIKey = "NDC713BNFZHKTUUM";
+#define TOKEN           "6ZgGCH1FTFDp8ViZ2zaBsfcSsAF7bY"
+#define TEMPERATURE_ID  "597160f37625421202d07932"
+#define VOLTAGE_ID      "5971616c762542120cea6c34"
+#define RELAY_ID        "597162ae7625421202d092e8"
+#define SETUP_ID        "5971641976254212005bf66e"
+
 
 /*
   *****************************************************************************************
@@ -42,7 +33,7 @@ const char * RelayReadAPIKey = "NDC713BNFZHKTUUM";
   *****************************************************************************************
   **** Relay configuration
   *****************************************************************************************/
-#define RELAY_PIN 10     // Digital pin for the Power Relay
+#define RELAY_PIN 5     // Digital pin for the Power Relay
 
 
 #endif
