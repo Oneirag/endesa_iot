@@ -27,7 +27,7 @@ char* password = "your_wifi_password";      //You can freely change it ;)
 //Configuration for DHT11
 #define DHT_PIN 4        // Digital Pin for the DHT temperature sensor
 
-#define DHTTYPE DHT11   // DHT 11
+#define DHTTYPE DHT22   // DHT 22
 
 /*
   *****************************************************************************************
